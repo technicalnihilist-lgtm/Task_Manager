@@ -36,7 +36,7 @@ echo "==> linking resources + assets"
   -I "$AJ" --manifest AndroidManifest.xml "$OUT/res.zip" \
   -A assets --java "$OUT/gen" \
   --min-sdk-version 21 --target-sdk-version 34 \
-  --version-code 1 --version-name 1.0
+  --version-code 2 --version-name 1.1
 
 echo "==> compiling java"
 SRC=$(find src "$OUT/gen" -name '*.java')

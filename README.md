@@ -3,19 +3,36 @@
 A real, installable Android app built from the single-file web app `Task_Manager.html`.
 
 The HTML file is bundled byte-for-byte inside the APK and runs in a full-screen
-`WebView` with JavaScript, DOM storage and localStorage enabled — so everything
-the page does (device stats, app tracking, glass/parallax settings) works offline
-inside the app, and your data survives restarts.
+`WebView` with JavaScript, DOM storage and localStorage enabled — so everything the
+page does (device stats, app tracking, glass/parallax settings) works offline inside
+the app, and your data survives restarts.
 
 | | |
 |---|---|
 | Package | `com.hubclue.taskmanager` |
-| Version | 1.0 (versionCode 1) |
+| Version | 1.1 (versionCode 2) |
 | Min SDK | 21 (Android 5.0) |
 | Target SDK | 34 (Android 14) |
 | Permissions | **none** — the app never touches the network |
-| Size | ~79 KB |
+| Size | ~102 KB |
 | APK | [`Task_Manager.apk`](Task_Manager.apk) |
+
+## Screenshots
+
+| Overview | Apps |
+|---|---|
+| ![Overview](screenshots/01-overview.png) | ![Apps](screenshots/02-apps.png) |
+
+| Settings | Dark mode |
+|---|---|
+| ![Settings](screenshots/03-settings.png) | ![Overview, dark](screenshots/04-overview-dark.png) |
+
+![Apps, dark mode](screenshots/05-apps-dark.png)
+
+> Captured at 1170 × 2532 (390 × 844 CSS px @3x) from the same HTML that ships in the
+> APK. Everything on the Overview tab is measured live, so CPU / RAM / FPS / GPU
+> describe the machine that rendered the screenshot (a headless Linux browser with a
+> software GPU) — on a phone those cards show that phone's numbers instead.
 
 ## Install
 
@@ -24,9 +41,9 @@ inside the app, and your data survives restarts.
 3. Open **Task Manager** from the app drawer.
 
 The APK is signed with a self-signed release key (v1 + v2 + v3 signatures), so it
-installs on stock Android without Play Protect complaining about an unsigned package.
-Because the key is self-signed and not from Play, Android may still show the usual
-"sideloaded app" prompt the first time — that is expected.
+installs on stock Android. Because the key is not from Play, Android may show the usual
+"sideloaded app" prompt the first time — that is expected. Version 1.1 is signed with the
+same key as 1.0, so it installs straight over it.
 
 ## What's inside the app
 
@@ -56,6 +73,14 @@ Same three tabs as the HTML, nothing removed:
   and opens any external link in the system browser.
 - Background colour and status/navigation bars match the page gradient, no action bar.
 
+## Launcher icon
+
+- Legacy icons (`mipmap-*/ic_launcher.png`, 48 → 192 px) for Android 5–7.
+- An adaptive icon (`mipmap-anydpi-v26/ic_launcher.xml` + background/foreground layers,
+  108 dp canvas, artwork inside the 72 dp safe zone) for Android 8+, so the launcher can
+  mask it to a circle, squircle or rounded square without cropping the mark.
+- `tools/make_icons.py` draws all of them with Pillow; run it after changing the colours.
+
 ## Build it yourself
 
 No Gradle, no Android Studio — just the SDK build-tools:
@@ -79,14 +104,16 @@ python3 tools/make_icons.py
 
 ```
 AndroidManifest.xml
-build.sh                     one-shot build script
-assets/www/index.html        the original web app, unchanged
+build.sh                          one-shot build script
+assets/www/index.html             the original web app, unchanged
 src/com/hubclue/taskmanager/MainActivity.java
 res/values/{strings,colors,styles}.xml
-res/mipmap-*/ic_launcher.png launcher icons (48 → 192 px)
-tools/make_icons.py          icon generator
-tools/icon-512.png           store-size icon
-Task_Manager.apk             signed, installable build
+res/mipmap-anydpi-v26/ic_launcher.xml   adaptive icon
+res/mipmap-*/ic_launcher*.png           legacy + adaptive icon layers
+screenshots/                      README screenshots (1170 × 2532)
+tools/make_icons.py               icon generator
+tools/icon-512.png                store-size icon
+Task_Manager.apk                  signed, installable build
 ```
 
 ## Notes
