@@ -1,0 +1,6 @@
+build/
+keystore.jks
+*.jks
+*.keystore
+hs_err_pid*.log
+.DS_Store

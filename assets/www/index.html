@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Task Manager</title>
+<style>
+:root{--gc:255,255,255;--tx:#14161c;--tx2:#4b5060;--ok:#1fa75a;--warn:#e8890c;--info:#2f7df6;--bad:#e5484d;--ga:.45;--blur:24px;--depth:1;--par:1;--px:0;--py:0;--spring:cubic-bezier(.34,1.35,.64,1);--dur:.55s;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gc:36,38,50;--tx:#f4f5f8;--tx2:#aab0c0}}
+:root[data-theme="dark"]{--gc:36,38,50;--tx:#f4f5f8;--tx2:#aab0c0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;color:var(--tx);background:#9db4ff}
+body{background:linear-gradient(160deg,#8fb2ff,#c9a6ff 50%,#ffb5c8);min-height:100vh;overflow-x:hidden}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:linear-gradient(160deg,#10163a,#2a1450 55%,#40142e)}}
+:root[data-theme="dark"] body{background:linear-gradient(160deg,#10163a,#2a1450 55%,#40142e)}
+.bg{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.b{position:absolute;border-radius:50%;filter:blur(40px);opacity:.75;transform:translate3d(calc(var(--px)*var(--d)*1px*var(--par)),calc(var(--py)*var(--d)*1px*var(--par)),0)}
+.b1{width:260px;height:260px;left:-60px;top:6%;background:#ff7ab8;--d:60}
+.b2{width:300px;height:300px;right:-90px;top:30%;background:#4fd1ff;--d:-80}
+.b3{width:240px;height:240px;left:10%;bottom:-40px;background:#ffd36b;--d:100}
+.b4{width:160px;height:160px;right:15%;top:-30px;background:#8a7bff;--d:-40}
+#app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:18px 14px 120px;perspective:1100px}
+h1{font-size:30px;margin:6px 4px 14px;letter-spacing:-.5px}
+.glass{background:rgba(var(--gc),var(--ga));-webkit-backdrop-filter:blur(var(--blur)) saturate(180%);backdrop-filter:blur(var(--blur)) saturate(180%);border:1px solid rgba(255,255,255,.38);border-radius:26px;position:relative;box-shadow:inset 0 1.5px 1px rgba(255,255,255,.65),inset 0 -1px 1px rgba(255,255,255,.12),calc(var(--px)*-10px*var(--depth)) calc(14px + var(--py)*-8px*var(--depth)) 34px rgba(0,0,0,.2)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at calc(50% + var(--px)*40%) calc(0% + var(--py)*20%),rgba(255,255,255,.35),transparent 55%)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{padding:14px;transform:perspective(900px) rotateX(calc(var(--py)*-6deg*var(--depth))) rotateY(calc(var(--px)*6deg*var(--depth)));will-change:transform}
+.card.wide{grid-column:1/-1}
+.z1{transform:translate(calc(var(--px)*3px*var(--depth)),calc(var(--py)*3px*var(--depth)))}
+.z2{transform:translate(calc(var(--px)*7px*var(--depth)),calc(var(--py)*7px*var(--depth)))}
+.lbl{font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
+.big{font-size:26px;font-weight:700;margin:4px 0}
+.sub{font-size:12.5px;color:var(--tx2);line-height:1.45;word-break:break-word}
+.ring{width:84px;height:84px;display:block;margin:6px auto 2px}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .t{stroke:rgba(128,128,150,.25)}
+.ring .v{stroke:var(--info);transition:stroke-dashoffset .8s var(--spring),stroke .3s;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring text{font-size:19px;font-weight:700;fill:var(--tx);text-anchor:middle;dominant-baseline:central}
+.bar{height:9px;border-radius:9px;background:rgba(128,128,150,.25);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;border-radius:9px;background:var(--info);transition:width .8s var(--spring)}
+.view.in{animation:vin var(--dur) var(--spring) both}.view.out{animation:vout .16s ease-in both}
+@keyframes vin{from{opacity:0;transform:translateY(34px) scale(.93)}to{opacity:1;transform:none}}
+@keyframes vout{to{opacity:0;transform:translateY(-10px) scale(.97)}}
+.view[hidden]{display:none}
+.note{padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:12px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sum div{padding:10px;text-align:center}.sum b{display:block;font-size:18px}
+.bar2{display:flex;gap:8px;margin-bottom:12px}
+button,select,input{font:inherit;color:var(--tx)}
+.btn{border:0;border-radius:18px;padding:12px 16px;font-weight:600;background:var(--info);color:#fff;cursor:pointer;transition:transform .35s var(--spring)}
+.btn:active{transform:scale(.9)}.btn.g{background:rgba(var(--gc),.5);color:var(--tx);border:1px solid rgba(255,255,255,.4)}
+select{flex:1;border-radius:18px;padding:10px 12px;border:1px solid rgba(255,255,255,.4);background:rgba(var(--gc),.5)}
+.row{padding:13px 14px;margin-bottom:10px;animation:vin var(--dur) var(--spring) both;animation-delay:calc(var(--i,0)*45ms)}
+.row.del{animation:vout .22s ease-in both}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rh b{font-size:16px}
+.chip{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.x{border:0;background:none;color:var(--bad);font-weight:700;font-size:13px;cursor:pointer;padding:4px 0}
+.tabbar{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:5;display:flex;padding:6px;border-radius:34px;width:min(360px,calc(100% - 28px))}
+.tabbar button{flex:1;position:relative;z-index:1;border:0;background:none;padding:11px 4px;font-weight:600;font-size:13.5px;color:var(--tx2);cursor:pointer;transition:transform .4s var(--spring),color .2s}
+.tabbar button.on{color:var(--tx)}.tabbar button:active{transform:scale(.88)}
+.pill{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px)/3);border-radius:28px;background:rgba(255,255,255,.4);box-shadow:inset 0 1px 1px rgba(255,255,255,.7),0 4px 12px rgba(0,0,0,.12);transition:transform .55s var(--spring)}
+.ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.3);display:flex;align-items:flex-end;justify-content:center;animation:fi .25s both}
+.ov[hidden]{display:none}.ov.out{animation:fo .25s both}
+@keyframes fi{from{opacity:0}}@keyframes fo{to{opacity:0}}
+.sheet{width:100%;max-width:560px;border-radius:30px 30px 0 0;padding:18px 16px calc(22px + env(safe-area-inset-bottom,0px));animation:su var(--dur) var(--spring) both;max-height:92vh;overflow:auto;--ga:.8}
+.ov.out .sheet{animation:sd .28s ease-in both}
+@keyframes su{from{transform:translateY(100%)}}@keyframes sd{to{transform:translateY(100%)}}
+.sheet label{display:block;font-size:12px;font-weight:600;color:var(--tx2);margin:10px 0 4px}
+.sheet input{width:100%;border-radius:14px;padding:11px 12px;border:1px solid rgba(128,128,150,.35);background:rgba(var(--gc),.6)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--bad);font-size:12.5px;min-height:18px;margin-top:8px}
+.set{padding:14px;margin-bottom:12px}.set label{display:flex;justify-content:space-between;font-weight:600;font-size:14px}
+.set input[type=range]{width:100%;margin:10px 0 2px;accent-color:var(--info)}
+.empty{text-align:center;padding:30px 16px;color:var(--tx2)}
+</style></head><body>
+<div class="bg"><i class="b b1"></i><i class="b b2"></i><i class="b b3"></i><i class="b b4"></i></div>
+<main id="app">
+<h1 id="ttl">Overview</h1>
+<section id="v-over" class="view in">
+ <div class="grid">
+  <div class="glass card"><div class="z1"><div class="lbl">CPU (estimate)</div><svg class="ring" viewBox="0 0 100 100" id="r-cpu"><circle class="t" cx="50" cy="50" r="42"/><circle class="v" cx="50" cy="50" r="42"/><text x="50" y="52">–</text></svg><div class="sub z2" id="cpu-s">–</div></div></div>
+  <div class="glass card"><div class="z1"><div class="lbl">RAM</div><svg class="ring" viewBox="0 0 100 100" id="r-ram"><circle class="t" cx="50" cy="50" r="42"/><circle class="v" cx="50" cy="50" r="42"/><text x="50" y="52">–</text></svg><div class="sub z2" id="ram-s">–</div></div></div>
+  <div class="glass card"><div class="z1"><div class="lbl">GPU / FPS</div><div class="big" id="fps">–</div><div class="sub z2" id="gpu-s">–</div><div class="bar"><i id="fps-b"></i></div></div></div>
+  <div class="glass card"><div class="z1"><div class="lbl">Battery</div><div class="big" id="bat">–</div><div class="sub z2" id="bat-s">–</div><div class="bar"><i id="bat-b"></i></div></div></div>
+  <div class="glass card wide"><div class="z1"><div class="lbl">Storage (browser ko mila hua)</div><div class="big" id="sto">–</div><div class="sub z2" id="sto-s">–</div><div class="bar"><i id="sto-b"></i></div></div></div>
+  <div class="glass card wide"><div class="z1"><div class="lbl">Network &amp; Device</div><div class="sub z2" id="dev" style="margin-top:6px">–</div></div></div>
+ </div>
+</section>
+<section id="v-apps" class="view" hidden>
+ <div class="glass note">⚠️ Browser sandbox ki wajah se koi website dusre apps ka CPU, data ya version nahi padh sakti. Isliye apps yahan <b>khud add karo</b> (Settings → App Store me dekh kar). Upar Overview ke device stats real hain.</div>
+ <div class="sum" id="sum"></div>
+ <div class="bar2"><select id="sort"><option value="store">Storage ke hisab se</option><option value="data">Data ke hisab se</option><option value="status">Update status</option><option value="name">Naam</option></select><button class="btn" id="add">+ App</button></div>
+ <div id="list"></div>
+</section>
+<section id="v-set" class="view" hidden>
+ <div class="glass set"><label>Transparency <span id="o-ga"></span></label><input type="range" id="s-ga" min="0.05" max="0.9" step="0.01"></div>
+ <div class="glass set"><label>Glass blur <span id="o-blur"></span></label><input type="range" id="s-blur" min="0" max="50" step="1"></div>
+ <div class="glass set"><label>Parallax <span id="o-par"></span></label><input type="range" id="s-par" min="0" max="2" step="0.05"></div>
+ <div class="glass set"><label>4D depth <span id="o-depth"></span></label><input type="range" id="s-depth" min="0" max="2" step="0.05"></div>
+ <div class="glass set"><label>Bounce <span id="o-bounce"></span></label><input type="range" id="s-bounce" min="0" max="2" step="0.05"></div>
+ <div class="bar2"><button class="btn g" id="gyro">Gyro parallax on</button><button class="btn g" id="reset">Reset</button></div>
+ <div class="sub" id="gyro-s" style="padding:0 6px"></div>
+</section>
+</main>
+<nav class="tabbar glass"><i class="pill" id="pill"></i><button class="on" data-t="over">Overview</button><button data-t="apps">Apps</button><button data-t="set">Settings</button></nav>
+<div class="ov" id="ov" hidden><div class="sheet glass">
+ <h2 style="margin:0 0 4px">App add karo</h2>
+ <label>Naam</label><input id="f-name" maxlength="40" placeholder="WhatsApp">
+ <div class="two"><div><label>Installed version</label><input id="f-ver" placeholder="2.24.10"></div><div><label>Latest version</label><input id="f-lat" placeholder="2.24.12"></div></div>
+ <label>Last update date</label><input id="f-upd" type="date">
+ <div class="two"><div><label>Storage (MB)</label><input id="f-sto" type="number" min="0" step="any"></div><div><label>Data use (MB)</label><input id="f-dat" type="number" min="0" step="any"></div></div>
+ <div class="err" id="err"></div>
+ <div class="bar2" style="margin:8px 0 0"><button class="btn g" id="cancel" style="flex:1">Cancel</button><button class="btn" id="save" style="flex:1">Save</button></div>
+</div></div>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var DEF={ga:.45,blur:24,par:1,depth:1,bounce:1};
+var S=Object.assign({},DEF),A=[];
+try{var s=JSON.parse(localStorage.getItem("tm_s")||"null");if(s)Object.assign(S,s)}catch(e){}
+try{var a=JSON.parse(localStorage.getItem("tm_a")||"[]");if(Array.isArray(a))A=a}catch(e){}
+function save(){try{localStorage.setItem("tm_s",JSON.stringify(S));localStorage.setItem("tm_a",JSON.stringify(A))}catch(e){}}
+var root=document.documentElement;
+function apply(){
+ root.style.setProperty("--ga",S.ga);root.style.setProperty("--blur",S.blur+"px");
+ root.style.setProperty("--par",S.par);root.style.setProperty("--depth",S.depth);
+ var b=S.bounce;
+ root.style.setProperty("--spring",b>0?"cubic-bezier(.34,"+(1+.4*b).toFixed(2)+",.64,1)":"cubic-bezier(.2,.8,.3,1)");
+ root.style.setProperty("--dur",b>0?".55s":".28s");
+ ["ga","blur","par","depth","bounce"].forEach(function(k){$("#s-"+k).value=S[k];$("#o-"+k).textContent=k==="blur"?S[k]+"px":(+S[k]).toFixed(2)});
+}
+["ga","blur","par","depth","bounce"].forEach(function(k){$("#s-"+k).addEventListener("input",function(e){S[k]=parseFloat(e.target.value);apply();save()})});
+$("#reset").onclick=function(){Object.assign(S,DEF);apply();save()};
+apply();
+
+/* tabs */
+var cur="over",busy=false,titles={over:"Overview",apps:"Apps",set:"Settings"},order=["over","apps","set"];
+function go(t){
+ if(t===cur||busy)return;busy=true;
+ var o=$("#v-"+cur),n=$("#v-"+t);
+ $("#pill").style.transform="translateX("+order.indexOf(t)*100+"%)";
+ document.querySelectorAll(".tabbar button").forEach(function(b){b.classList.toggle("on",b.dataset.t===t)});
+ o.classList.remove("in");o.classList.add("out");
+ setTimeout(function(){
+  o.hidden=true;o.classList.remove("out");
+  n.hidden=false;n.classList.remove("in");void n.offsetWidth;n.classList.add("in");
+  $("#ttl").textContent=titles[t];cur=t;busy=false;
+  if(t==="apps")render();window.scrollTo(0,0);
+ },S.bounce>0?160:90);
+}
+document.querySelectorAll(".tabbar button").forEach(function(b){b.onclick=function(){go(b.dataset.t)}});
+
+/* apps */
+function cmp(a,b){var x=String(a).split(/[.\-]/).map(function(n){return parseInt(n)||0}),y=String(b).split(/[.\-]/).map(function(n){return parseInt(n)||0});
+ for(var i=0;i<Math.max(x.length,y.length);i++){var d=(x[i]||0)-(y[i]||0);if(d)return d>0?1:-1}return 0}
+function fmtMB(m){return m>=1024?(m/1024).toFixed(2)+" GB":(+m).toFixed(m<10?1:0)+" MB"}
+function days(d){if(!d)return null;var t=new Date(d+"T00:00:00"),n=new Date();n.setHours(0,0,0,0);return Math.max(0,Math.round((n-t)/864e5))}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function render(){
+ var k=$("#sort").value,L=A.slice();
+ L.sort(function(a,b){if(k==="name")return a.name.localeCompare(b.name);if(k==="status")return cmp(a.ver,a.lat)-cmp(b.ver,b.lat);return b[k]-a[k]});
+ var ts=0,td=0,old=0,mx=Math.max.apply(null,A.map(function(x){return Math.max(x.sto,x.dat)}).concat([1]));
+ A.forEach(function(x){ts+=x.sto;td+=x.dat;if(cmp(x.ver,x.lat)<0)old++});
+ $("#sum").innerHTML='<div class="glass"><b>'+fmtMB(ts)+'</b><span class="sub">Storage</span></div><div class="glass"><b>'+fmtMB(td)+'</b><span class="sub">Data</span></div><div class="glass"><b>'+old+'/'+A.length+'</b><span class="sub">Purane</span></div>';
+ if(!L.length){$("#list").innerHTML='<div class="glass empty">Abhi koi app nahi hai.<br>“+ App” dabao aur apni apps add karo.</div>';return}
+ $("#list").innerHTML=L.map(function(x,i){
+  var o=cmp(x.ver,x.lat)<0,d=days(x.upd),rec=d!==null&&d<=7;
+  return '<div class="glass row" style="--i:'+Math.min(i,12)+'" data-id="'+x.id+'"><div class="rh"><b>'+esc(x.name)+'</b><span class="chip" style="background:var(--'+(o?"warn":"ok")+')">'+(o?"Purana version":"Latest")+'</span></div>'+
+  '<div class="chips"><span class="sub">v'+esc(x.ver)+(o?' → v'+esc(x.lat)+' available':'')+'</span>'+(rec?'<span class="chip" style="background:var(--info)">Recently updated</span>':'')+'</div>'+
+  '<div class="sub">'+(d===null?'Update date nahi di':d===0?'Aaj update hui':d+' din pehle update hui')+'</div>'+
+  '<div class="sub" style="margin-top:6px">Storage '+fmtMB(x.sto)+'</div><div class="bar"><i style="width:'+(x.sto/mx*100)+'%"></i></div>'+
+  '<div class="sub" style="margin-top:6px">Data '+fmtMB(x.dat)+'</div><div class="bar"><i style="width:'+(x.dat/mx*100)+'%;background:var(--ok)"></i></div>'+
+  '<button class="x" data-del="'+x.id+'">Hatao</button></div>'}).join("");
+}
+$("#sort").onchange=render;
+$("#list").addEventListener("click",function(e){
+ var id=e.target.getAttribute("data-del");if(!id)return;
+ var r=e.target.closest(".row");r.classList.add("del");
+ setTimeout(function(){A=A.filter(function(x){return String(x.id)!==id});save();render()},220);
+});
+function openSheet(){var o=$("#ov");o.classList.remove("out");o.hidden=false;$("#err").textContent="";
+ ["name","ver","lat","upd","sto","dat"].forEach(function(i){$("#f-"+i).value=""});$("#f-upd").max=new Date().toISOString().slice(0,10)}
+function closeSheet(){var o=$("#ov");if(o.hidden||o.classList.contains("out"))return;o.classList.add("out");
+ setTimeout(function(){o.hidden=true;o.classList.remove("out")},290)}
+$("#add").onclick=openSheet;$("#cancel").onclick=closeSheet;
+$("#ov").addEventListener("pointerdown",function(e){if(e.target===$("#ov"))closeSheet()});
+$("#save").onclick=function(){
+ var n=$("#f-name").value.trim(),v=$("#f-ver").value.trim(),l=$("#f-lat").value.trim()||v,u=$("#f-upd").value,
+ st=parseFloat($("#f-sto").value||"0"),da=parseFloat($("#f-dat").value||"0"),er="";
+ if(!n)er="App ka naam likho.";else if(!v)er="Installed version likho.";
+ else if(!/^[0-9]+([.\-][0-9a-zA-Z]+)*$/.test(v)||!/^[0-9]+([.\-][0-9a-zA-Z]+)*$/.test(l))er="Version number jaisa likho (jaise 2.24.10).";
+ else if(isNaN(st)||isNaN(da)||st<0||da<0)er="Storage/Data 0 ya usse zyada hona chahiye.";
+ else if(u&&u>new Date().toISOString().slice(0,10))er="Update date future ki nahi ho sakti.";
+ if(er){$("#err").textContent=er;return}
+ A.push({id:Date.now()+Math.floor(Math.random()*1000),name:n,ver:v,lat:l,upd:u,sto:st,dat:da});
+ save();closeSheet();render();
+};
+
+/* real metrics */
+function ring(id,p,t,c){var s=$(id),r=42,C=2*Math.PI*r,v=s.querySelector(".v");
+ v.style.strokeDasharray=C;v.style.strokeDashoffset=C*(1-Math.max(0,Math.min(1,p/100)));
+ v.style.stroke=c||(p>80?"var(--bad)":p>55?"var(--warn)":"var(--info)");s.querySelector("text").textContent=t}
+function bar(id,p,c){var e=$(id);e.style.width=Math.max(0,Math.min(100,p))+"%";if(c)e.style.background=c}
+var best=1e9,cpu=0,junk=0;
+function bench(){var t=performance.now(),x=0;for(var i=0;i<250000;i++)x+=Math.sqrt(i);junk=x;var d=performance.now()-t;
+ best=Math.min(best,d);var l=Math.max(0,Math.min(100,(1-best/d)*100*1.5));cpu=cpu*.6+l*.4;
+ ring("#r-cpu",cpu,Math.round(cpu)+"%");$("#cpu-s").textContent=(navigator.hardwareConcurrency||"?")+" cores · UI thread load estimate"}
+var gpuName="Unknown";
+try{var c=document.createElement("canvas"),gl=c.getContext("webgl")||c.getContext("experimental-webgl");
+ if(gl){var e=gl.getExtension("WEBGL_debug_renderer_info");gpuName=e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)}}catch(e){}
+var fr=0,lt=performance.now();
+function loop(){fr++;requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function stats(){
+ var n=performance.now(),f=Math.round(fr*1000/(n-lt));fr=0;lt=n;
+ $("#fps").textContent=f+" FPS";$("#gpu-s").textContent=gpuName;bar("#fps-b",f/60*100,f<30?"var(--bad)":f<50?"var(--warn)":"var(--ok)");
+ var pm=performance.memory,dm=navigator.deviceMemory;
+ if(pm){var u=pm.usedJSHeapSize/1048576,lim=pm.jsHeapSizeLimit/1048576;ring("#r-ram",u/lim*100,Math.round(u)+"MB");$("#ram-s").textContent="JS heap "+u.toFixed(0)+" / "+lim.toFixed(0)+" MB"+(dm?" · Device ~"+dm+" GB":"")}
+ else{ring("#r-ram",0,dm?dm+"GB":"N/A","var(--info)");$("#ram-s").textContent=dm?"Device RAM (approx, browser limit)":"Is browser me RAM info available nahi"}
+ var cn=navigator.connection;
+ $("#dev").innerHTML="Platform: "+esc(navigator.platform||"?")+"<br>Screen: "+screen.width+"×"+screen.height+" @"+(window.devicePixelRatio||1)+"x<br>Network: "+(cn?(cn.effectiveType||"?")+(cn.downlink?" · "+cn.downlink+" Mbps":"")+(cn.rtt?" · "+cn.rtt+"ms":""):"info available nahi")+"<br>Online: "+(navigator.onLine?"Haan":"Nahi");
+}
+function sto(){
+ if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(function(r){
+  var u=r.usage||0,q=r.quota||1;$("#sto").textContent=fmtMB(u/1048576)+" used";$("#sto-s").textContent="Quota "+fmtMB(q/1048576)+" (sirf is browser/site ka hissa, poore phone ka nahi)";bar("#sto-b",Math.max(1,u/q*100))
+ }).catch(function(){$("#sto").textContent="N/A"});
+ else{$("#sto").textContent="N/A";$("#sto-s").textContent="Browser support nahi"}
+}
+function batt(){
+ if(!navigator.getBattery){$("#bat").textContent="N/A";$("#bat-s").textContent="Is browser me Battery API nahi (iOS Safari)";return}
+ navigator.getBattery().then(function(b){function u(){var p=Math.round(b.level*100);$("#bat").textContent=p+"%";$("#bat-s").textContent=b.charging?"Charging":"Not charging";bar("#bat-b",p,p<20&&!b.charging?"var(--bad)":"var(--ok)")}
+  u();b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u)}).catch(function(){$("#bat").textContent="N/A"});
+}
+sto();batt();bench();stats();
+setInterval(function(){if(!document.hidden){bench();stats()}},1000);setInterval(sto,15000);
+
+/* parallax / depth */
+var tx=0,ty=0,cx=0,cy=0,gy=false;
+window.addEventListener("pointermove",function(e){if(gy)return;tx=(e.clientX/innerWidth-.5)*2;ty=(e.clientY/innerHeight-.5)*2},{passive:true});
+window.addEventListener("pointerleave",function(){if(!gy){tx=0;ty=0}});
+function gyro(e){if(e.gamma==null)return;tx=Math.max(-1,Math.min(1,e.gamma/30));ty=Math.max(-1,Math.min(1,((e.beta||0)-45)/30))}
+$("#gyro").onclick=function(){
+ var st=$("#gyro-s");
+ if(gy){gy=false;window.removeEventListener("deviceorientation",gyro);$("#gyro").textContent="Gyro parallax on";st.textContent="";return}
+ function on(){gy=true;window.addEventListener("deviceorientation",gyro);$("#gyro").textContent="Gyro parallax off";st.textContent="Phone ko tilt karke dekho."}
+ if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function"){
+  DeviceOrientationEvent.requestPermission().then(function(r){r==="granted"?on():st.textContent="Permission nahi mili."}).catch(function(){st.textContent="Gyro available nahi."})
+ }else if(window.DeviceOrientationEvent)on();else st.textContent="Is device me gyro sensor nahi.";
+};
+var lx=-9,ly=-9;
+(function tick(){cx+=(tx-cx)*.08;cy+=(ty-cy)*.08;
+ if(Math.abs(cx-lx)>.002||Math.abs(cy-ly)>.002){lx=cx;ly=cy;root.style.setProperty("--px",cx.toFixed(3));root.style.setProperty("--py",cy.toFixed(3))}
+ requestAnimationFrame(tick)})();
+})();
+</script></body></html>
