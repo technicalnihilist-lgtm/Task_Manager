@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="assets/icon.png" width="96" height="96" alt="Real installable Android APK built from Task_Manager.html - WebView shell, device stats, app… icon">
+<img src="assets/icon.png" width="96" height="96" alt="Task Manager icon">
 
-<img src="assets/banner.svg" alt="Real installable Android APK built from Task_Manager.html - WebView shell, device stats, app…">
+<img src="assets/banner.svg" alt="Task Manager">
+
+<a href="https://technicalnihilist-lgtm.github.io/apps-site/apps/Task_Manager.html"><img src="https://img.shields.io/badge/WEBSITE-OPEN-3B82F6?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website"></a>
 
 <a href="https://github.com/technicalnihilist-lgtm/Task_Manager/stargazers"><img src="https://img.shields.io/badge/stars-0-5A31F4?style=for-the-badge&logo=github&logoColor=white" alt="stars: 0"></a>&nbsp;<a href="https://github.com/technicalnihilist-lgtm/Task_Manager/network/members"><img src="https://img.shields.io/badge/forks-0-3FB950?style=for-the-badge" alt="forks: 0"></a>
 
